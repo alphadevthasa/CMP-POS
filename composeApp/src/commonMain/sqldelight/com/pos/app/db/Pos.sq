@@ -1,0 +1,113 @@
+CREATE TABLE category (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL
+);
+
+CREATE TABLE product (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    sku TEXT NOT NULL,
+    price INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE pos_order (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    order_no TEXT NOT NULL,
+    status TEXT NOT NULL,
+    note TEXT NOT NULL DEFAULT '',
+    subtotal INTEGER NOT NULL DEFAULT 0,
+    tax INTEGER NOT NULL DEFAULT 0,
+    discount INTEGER NOT NULL DEFAULT 0,
+    total INTEGER NOT NULL DEFAULT 0,
+    paid_total INTEGER NOT NULL DEFAULT 0,
+    change_due INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE order_line (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    name_snapshot TEXT NOT NULL,
+    price_snapshot INTEGER NOT NULL,
+    qty INTEGER NOT NULL,
+    line_total INTEGER NOT NULL
+);
+
+CREATE TABLE payment (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL,
+    method TEXT NOT NULL,
+    amount INTEGER NOT NULL,
+    tendered INTEGER NOT NULL,
+    change_given INTEGER NOT NULL,
+    created_at INTEGER NOT NULL
+);
+
+CREATE TABLE setting (
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+countProducts:
+SELECT count(*) FROM product;
+
+insertCategory:
+INSERT INTO category(name) VALUES (?);
+
+insertProduct:
+INSERT INTO product(name, sku, price, category_id, active) VALUES (?, ?, ?, ?, ?);
+
+selectAllCategories:
+SELECT * FROM category ORDER BY name;
+
+selectProducts:
+SELECT * FROM product WHERE active = 1 ORDER BY name;
+
+insertOrder:
+INSERT INTO pos_order(order_no, status, note, subtotal, tax, discount, total, paid_total, change_due, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+lastInsertRowId:
+SELECT last_insert_rowid();
+
+updateOrderStatus:
+UPDATE pos_order SET status = ?, updated_at = ? WHERE id = ?;
+
+updateOrderTotals:
+UPDATE pos_order SET subtotal = ?, tax = ?, discount = ?, total = ?, updated_at = ? WHERE id = ?;
+
+updateOrderPaid:
+UPDATE pos_order SET paid_total = ?, change_due = ?, updated_at = ? WHERE id = ?;
+
+selectOrders:
+SELECT * FROM pos_order ORDER BY created_at DESC;
+
+selectOrderById:
+SELECT * FROM pos_order WHERE id = ?;
+
+insertOrderLine:
+INSERT INTO order_line(order_id, product_id, name_snapshot, price_snapshot, qty, line_total)
+VALUES (?, ?, ?, ?, ?, ?);
+
+selectLinesByOrder:
+SELECT * FROM order_line WHERE order_id = ? ORDER BY id;
+
+deleteLinesByOrder:
+DELETE FROM order_line WHERE order_id = ?;
+
+insertPayment:
+INSERT INTO payment(order_id, method, amount, tendered, change_given, created_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+selectPaymentsByOrder:
+SELECT * FROM payment WHERE order_id = ? ORDER BY id;
+
+getSetting:
+SELECT value FROM setting WHERE key = ?;
+
+putSetting:
+INSERT OR REPLACE INTO setting(key, value) VALUES (?, ?);
