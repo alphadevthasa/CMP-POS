@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -58,7 +59,7 @@ fun RegisterScreen(scope: CoroutineScope, snackbar: SnackbarHostState) {
     var printName by remember { mutableStateOf("struk") }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        val twoPane = maxWidth >= 900.dp
+        val twoPane = maxWidth >= 700.dp
         if (twoPane) {
             Row(Modifier.fillMaxSize()) {
                 ProductPane(Modifier.weight(1f).fillMaxHeight(), scope = scope)
@@ -74,7 +75,7 @@ fun RegisterScreen(scope: CoroutineScope, snackbar: SnackbarHostState) {
             Column(Modifier.fillMaxSize()) {
                 ProductPane(Modifier.weight(1f).fillMaxWidth(), scope = scope)
                 CartPane(
-                    Modifier.fillMaxWidth(),
+                    Modifier.fillMaxWidth().heightIn(max = 380.dp),
                     scope = scope,
                     snackbar = snackbar,
                     onPay = { showPayment = true },
