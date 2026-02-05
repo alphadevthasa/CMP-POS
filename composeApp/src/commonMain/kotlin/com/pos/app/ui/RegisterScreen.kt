@@ -26,13 +26,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pos.app.domain.model.CartItem
 import com.pos.app.domain.model.Product
@@ -154,30 +157,35 @@ private fun ProductPane(modifier: Modifier, scope: CoroutineScope) {
 private fun ProductCard(product: Product, onClick: () -> Unit) {
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.height(104.dp).fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = Modifier.height(120.dp).fillMaxWidth(),
     ) {
-        Row(
+        Column(
             Modifier.fillMaxSize().padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Box(
                 Modifier
-                    .size(44.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                    .size(42.dp)
+                    .background(productAvatarColor(product.name), CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     productInitials(product.name),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = AvatarText,
                 )
             }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(product.name, style = MaterialTheme.typography.titleMedium, maxLines = 2)
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    product.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 2,
+                )
                 Text(
                     product.price.toRupiah(),
                     style = MaterialTheme.typography.bodyLarge,
@@ -200,7 +208,6 @@ private fun CartPane(
     val store = LocalStore.current
     val state by store.state.collectAsState()
     val totals = state.totals
-    var discountText by remember { mutableStateOf("") }
 
     Column(
         modifier
@@ -238,22 +245,27 @@ private fun CartPane(
 
         HorizontalDivider()
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(
-            value = discountText,
-            onValueChange = {
-                discountText = it.filter { ch -> ch.isDigit() }
-                store.setDiscount(discountText.toLongOrNull() ?: 0)
-            },
-            label = { Text("Diskon (Rp)") },
-            singleLine = true,
+        RupiahTextField(
+            value = state.discount,
+            onValueChange = { store.setDiscount(it) },
+            label = "Diskon",
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(8.dp))
 
-        TotalRow("Subtotal", totals.subtotal.toRupiah())
-        if (totals.discount > 0) TotalRow("Diskon", "-" + totals.discount.toRupiah())
-        if (totals.tax > 0) TotalRow("Pajak", totals.tax.toRupiah())
-        TotalRow("Total", totals.total.toRupiah(), emphasized = true)
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(Modifier.padding(12.dp)) {
+                TotalRow("Subtotal", totals.subtotal.toRupiah())
+                if (totals.discount > 0) TotalRow("Diskon", "-" + totals.discount.toRupiah())
+                if (totals.tax > 0) TotalRow("Pajak", totals.tax.toRupiah())
+                HorizontalDivider(Modifier.padding(vertical = 6.dp))
+                TotalRow("Total", totals.total.toRupiah(), emphasized = true)
+            }
+        }
 
         Spacer(Modifier.height(10.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -297,12 +309,25 @@ private fun CartRow(
             Text(item.lineTotal.toRupiah(), fontWeight = FontWeight.SemiBold)
         }
         Spacer(Modifier.height(4.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = onDec, contentPadding = PaddingValues(0.dp), modifier = Modifier.width(44.dp)) { Text("−") }
-            Text("${item.qty}", fontWeight = FontWeight.Bold)
-            OutlinedButton(onClick = onInc, contentPadding = PaddingValues(0.dp), modifier = Modifier.width(44.dp)) { Text("+") }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FilledTonalButton(
+                onClick = onDec,
+                modifier = Modifier.size(34.dp),
+                contentPadding = PaddingValues(0.dp),
+            ) { Text("−", fontWeight = FontWeight.Bold) }
+            Text(
+                "${item.qty}",
+                Modifier.width(34.dp),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+            )
+            FilledTonalButton(
+                onClick = onInc,
+                modifier = Modifier.size(34.dp),
+                contentPadding = PaddingValues(0.dp),
+            ) { Text("+", fontWeight = FontWeight.Bold) }
             Spacer(Modifier.weight(1f))
-            OutlinedButton(onClick = onRemove, contentPadding = PaddingValues(0.dp), modifier = Modifier.width(60.dp)) { Text("Hapus") }
+            TextButton(onClick = onRemove) { Text("Hapus", color = MaterialTheme.colorScheme.error) }
         }
     }
     HorizontalDivider()

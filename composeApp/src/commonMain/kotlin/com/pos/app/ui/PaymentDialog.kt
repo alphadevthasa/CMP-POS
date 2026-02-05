@@ -11,7 +11,6 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,8 +32,7 @@ fun PaymentDialog(
     onConfirm: (PaymentMethod, Long) -> Unit,
 ) {
     var method by remember { mutableStateOf(PaymentMethod.CASH) }
-    var tenderedText by remember { mutableStateOf("") }
-    val tendered = tenderedText.toLongOrNull() ?: 0
+    var tendered by remember { mutableStateOf(0L) }
     val change = (tendered - total).coerceAtLeast(0)
     val canPay = method != PaymentMethod.CASH || tendered >= total
 
@@ -57,19 +55,18 @@ fun PaymentDialog(
 
                 if (method == PaymentMethod.CASH) {
                     Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = tenderedText,
-                        onValueChange = { tenderedText = it.filter { c -> c.isDigit() } },
-                        label = { Text("Uang diterima (Rp)") },
-                        singleLine = true,
+                    RupiahTextField(
+                        value = tendered,
+                        onValueChange = { tendered = it },
+                        label = "Uang diterima",
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        AssistChip(onClick = { tenderedText = total.toString() }, label = { Text("Uang pas") })
-                        AssistChip(onClick = { tenderedText = "50000" }, label = { Text("50rb") })
-                        AssistChip(onClick = { tenderedText = "100000" }, label = { Text("100rb") })
-                        AssistChip(onClick = { tenderedText = "200000" }, label = { Text("200rb") })
+                        AssistChip(onClick = { tendered = total }, label = { Text("Uang pas") })
+                        AssistChip(onClick = { tendered = 50_000 }, label = { Text("50rb") })
+                        AssistChip(onClick = { tendered = 100_000 }, label = { Text("100rb") })
+                        AssistChip(onClick = { tendered = 200_000 }, label = { Text("200rb") })
                     }
                     Spacer(Modifier.height(8.dp))
                     TotalLine("Kembalian", change.toRupiah())
