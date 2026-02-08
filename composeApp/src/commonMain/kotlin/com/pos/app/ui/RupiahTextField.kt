@@ -19,6 +19,7 @@ fun RupiahTextField(
     onValueChange: (Long) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
+    placeholder: String? = null,
 ) {
     var text by remember(value) {
         mutableStateOf(if (value == 0L) "" else "${value.grouped()},00")
@@ -33,6 +34,7 @@ fun RupiahTextField(
             onValueChange(parsed)
         },
         label = { Text(label) },
+        placeholder = placeholder?.let { { Text(it) } },
         prefix = { Text("Rp ") },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

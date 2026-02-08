@@ -20,3 +20,22 @@ fun Long.toDateString(): String {
     fun p(n: Int) = n.toString().padStart(2, '0')
     return "${p(d.dayOfMonth)}/${p(d.monthNumber)}/${d.year}"
 }
+
+fun todayLongLabel(now: Long = nowEpochMs()): String {
+    val d = Instant.fromEpochMilliseconds(now)
+        .toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val dow = when (d.dayOfWeek) {
+        kotlinx.datetime.DayOfWeek.MONDAY -> "Senin"
+        kotlinx.datetime.DayOfWeek.TUESDAY -> "Selasa"
+        kotlinx.datetime.DayOfWeek.WEDNESDAY -> "Rabu"
+        kotlinx.datetime.DayOfWeek.THURSDAY -> "Kamis"
+        kotlinx.datetime.DayOfWeek.FRIDAY -> "Jumat"
+        kotlinx.datetime.DayOfWeek.SATURDAY -> "Sabtu"
+        kotlinx.datetime.DayOfWeek.SUNDAY -> "Minggu"
+    }
+    val months = listOf(
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+    )
+    return "$dow, ${d.dayOfMonth} ${months[d.monthNumber - 1]}"
+}

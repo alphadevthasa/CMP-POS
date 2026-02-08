@@ -1,6 +1,7 @@
 package com.pos.app.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,27 +28,30 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.pos.app.domain.model.CartItem
 import com.pos.app.domain.model.Product
 import com.pos.app.print.RLine
@@ -54,6 +59,8 @@ import com.pos.app.util.productInitials
 import com.pos.app.util.toRupiah
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
+private val StatusOrange = Color(0xFFB45309)
 
 @Composable
 fun RegisterScreen(scope: CoroutineScope, snackbar: SnackbarHostState) {
@@ -66,27 +73,24 @@ fun RegisterScreen(scope: CoroutineScope, snackbar: SnackbarHostState) {
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val twoPane = maxWidth >= 700.dp
+        val cart: @Composable (Modifier) -> Unit = { mod ->
+            CartPane(
+                mod,
+                scope = scope,
+                snackbar = snackbar,
+                onPay = { showPayment = true },
+                onPrint = { lines, name -> printLines = lines; printName = name },
+            )
+        }
         if (twoPane) {
             Row(Modifier.fillMaxSize()) {
-                ProductPane(Modifier.weight(1f).fillMaxHeight(), scope = scope)
-                CartPane(
-                    Modifier.width(400.dp).fillMaxHeight(),
-                    scope = scope,
-                    snackbar = snackbar,
-                    onPay = { showPayment = true },
-                    onPrint = { lines, name -> printLines = lines; printName = name },
-                )
+                ProductPane(Modifier.weight(1f).fillMaxHeight())
+                cart(Modifier.width(420.dp).fillMaxHeight())
             }
         } else {
             Column(Modifier.fillMaxSize()) {
-                ProductPane(Modifier.weight(1f).fillMaxWidth(), scope = scope)
-                CartPane(
-                    Modifier.fillMaxWidth().heightIn(max = 380.dp),
-                    scope = scope,
-                    snackbar = snackbar,
-                    onPay = { showPayment = true },
-                    onPrint = { lines, name -> printLines = lines; printName = name },
-                )
+                ProductPane(Modifier.weight(1f).fillMaxWidth())
+                cart(Modifier.fillMaxWidth().heightIn(max = 380.dp))
             }
         }
     }
@@ -116,82 +120,186 @@ fun RegisterScreen(scope: CoroutineScope, snackbar: SnackbarHostState) {
 }
 
 @Composable
-private fun ProductPane(modifier: Modifier, scope: CoroutineScope) {
+private fun ProductPane(modifier: Modifier) {
     val store = LocalStore.current
     val state by store.state.collectAsState()
+    var query by remember { mutableStateOf("") }
 
-    Column(modifier.padding(12.dp)) {
+    val products = state.visibleProducts.filter {
+        query.isBlank() || it.name.contains(query, ignoreCase = true)
+    }
+
+    Column(modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
         Row(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            FilterChip(
-                selected = state.selectedCategoryId == null,
-                onClick = { store.selectCategory(null) },
-                label = { Text("Semua") },
-            )
-            state.categories.forEach { category ->
-                FilterChip(
-                    selected = state.selectedCategoryId == category.id,
-                    onClick = { store.selectCategory(category.id) },
-                    label = { Text(category.name) },
+            Column {
+                Text(
+                    "MEJA KASIR",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.2.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    "Pilih menu favorit",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    "Ketuk produk untuk menambahkan ke pesanan.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surface,
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+            ) {
+                Text(
+                    "${state.products.size} produk tersedia",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelMedium,
                 )
             }
         }
-        Spacer(Modifier.height(12.dp))
+
+        Spacer(Modifier.height(20.dp))
+
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                CategoryChip("Semua", state.selectedCategoryId == null) { store.selectCategory(null) }
+                state.categories.forEach { category ->
+                    CategoryChip(category.name, state.selectedCategoryId == category.id) {
+                        store.selectCategory(category.id)
+                    }
+                }
+            }
+            Spacer(Modifier.width(16.dp))
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                placeholder = { Text("Cari menu...") },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.width(260.dp),
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(150.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(bottom = 12.dp),
+            columns = GridCells.Adaptive(155.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 16.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
-            items(state.visibleProducts, key = { it.id }) { product ->
-                ProductCard(product) { store.addToCart(product) }
+            items(products, key = { it.id }) { product ->
+                val category = state.categories.firstOrNull { it.id == product.categoryId }?.name ?: ""
+                ProductCard(product, category) { store.addToCart(product) }
             }
         }
     }
 }
 
 @Composable
-private fun ProductCard(product: Product, onClick: () -> Unit) {
+private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.primary,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+            containerColor = MaterialTheme.colorScheme.surface,
+            labelColor = MaterialTheme.colorScheme.onSurface,
+        ),
+    )
+}
+
+@Composable
+private fun ProductCard(product: Product, category: String, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        modifier = Modifier.height(120.dp).fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().height(236.dp),
     ) {
-        Column(
-            Modifier.fillMaxSize().padding(12.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
+        Column(Modifier.padding(12.dp)) {
+            val base = productAvatarColor(product.name)
             Box(
                 Modifier
-                    .size(42.dp)
-                    .background(productAvatarColor(product.name), CircleShape),
-                contentAlignment = Alignment.Center,
+                    .fillMaxWidth()
+                    .height(116.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(base.copy(alpha = 0.65f), base.copy(alpha = 0.3f)),
+                        ),
+                        RoundedCornerShape(12.dp),
+                    ),
             ) {
+                Box(
+                    Modifier
+                        .align(Alignment.Center)
+                        .offset(x = 28.dp, y = -14.dp)
+                        .size(70.dp)
+                        .background(Color.White.copy(alpha = 0.35f), CircleShape),
+                )
                 Text(
                     productInitials(product.name),
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
                     color = AvatarText,
+                    letterSpacing = 1.sp,
+                    modifier = Modifier.align(Alignment.Center),
                 )
             }
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    product.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 2,
-                )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                category.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                product.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+            )
+            Spacer(Modifier.height(10.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
                     product.price.toRupiah(),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
                 )
+                Box(
+                    Modifier
+                        .size(32.dp)
+                        .background(MaterialTheme.colorScheme.primary, CircleShape)
+                        .clickable(onClick = onClick),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("+", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                }
             }
         }
     }
@@ -208,27 +316,53 @@ private fun CartPane(
     val store = LocalStore.current
     val state by store.state.collectAsState()
     val totals = state.totals
+    val itemCount = state.cart.sumOf { it.qty }
 
     Column(
         modifier
             .background(MaterialTheme.colorScheme.surface)
-            .padding(12.dp),
+            .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Pesanan", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("Pesanan saat ini", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+            ) {
+                Text(
+                    "$itemCount item",
+                    Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        }
+        Row(
+            Modifier.fillMaxWidth().padding(top = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
             Text(
-                state.savedOrderNo ?: "belum disimpan",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
+                "Siap untuk transaksi",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                state.savedOrderNo?.let { "Tersimpan · $it" } ?: "Belum disimpan",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                color = if (state.savedOrderNo == null) StatusOrange else MaterialTheme.colorScheme.primary,
             )
         }
-        Spacer(Modifier.height(8.dp))
-        HorizontalDivider()
-        Spacer(Modifier.height(8.dp))
+
+        Spacer(Modifier.height(12.dp))
 
         if (state.cart.isEmpty()) {
             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Keranjang kosong", color = MaterialTheme.colorScheme.secondary)
+                Text("Keranjang kosong", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             androidx.compose.foundation.lazy.LazyColumn(Modifier.weight(1f).fillMaxWidth()) {
@@ -243,56 +377,77 @@ private fun CartPane(
             }
         }
 
-        HorizontalDivider()
-        Spacer(Modifier.height(8.dp))
+        Text(
+            "Diskon pesanan",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(6.dp))
         RupiahTextField(
             value = state.discount,
             onValueChange = { store.setDiscount(it) },
             label = "Diskon",
+            placeholder = "Masukkan nominal diskon",
             modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(Modifier.height(8.dp))
+
+        Spacer(Modifier.height(12.dp))
 
         Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.background,
+            shape = RoundedCornerShape(14.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Column(Modifier.padding(12.dp)) {
-                TotalRow("Subtotal", totals.subtotal.toRupiah())
-                if (totals.discount > 0) TotalRow("Diskon", "-" + totals.discount.toRupiah())
-                if (totals.tax > 0) TotalRow("Pajak", totals.tax.toRupiah())
-                HorizontalDivider(Modifier.padding(vertical = 6.dp))
-                TotalRow("Total", totals.total.toRupiah(), emphasized = true)
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                SummaryRow("Subtotal", totals.subtotal.toRupiah())
+                SummaryRow("Diskon", "– " + totals.discount.toRupiah())
+                HorizontalDivider()
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("Total bayar", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(
+                        totals.total.toRupiah(),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
         }
 
-        Spacer(Modifier.height(10.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Spacer(Modifier.height(12.dp))
+
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(
                 onClick = {
                     store.saveOrder()
                     scope.launch { snackbar.showSnackbar("Pesanan disimpan") }
                 },
                 enabled = state.cart.isNotEmpty(),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).height(46.dp),
             ) { Text("Simpan") }
-
             OutlinedButton(
                 onClick = {
                     store.saveOrder()
                     onPrint(store.currentBillLines(), "bill-${state.savedOrderNo ?: "draft"}")
                 },
                 enabled = state.cart.isNotEmpty(),
-                modifier = Modifier.weight(1f),
-            ) { Text("Bill") }
+                modifier = Modifier.weight(1f).height(46.dp),
+            ) { Text("Lihat bill") }
         }
-        Spacer(Modifier.height(8.dp))
+
+        Spacer(Modifier.height(10.dp))
+
         Button(
             onClick = onPay,
             enabled = state.cart.isNotEmpty(),
             modifier = Modifier.fillMaxWidth().height(52.dp),
-        ) { Text("Bayar", style = MaterialTheme.typography.titleMedium) }
+        ) {
+            Text("Bayar sekarang", style = MaterialTheme.typography.titleMedium)
+        }
     }
 }
 
@@ -303,44 +458,78 @@ private fun CartRow(
     onDec: () -> Unit,
     onRemove: () -> Unit,
 ) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(item.product.name, modifier = Modifier.weight(1f), maxLines = 2)
-            Text(item.lineTotal.toRupiah(), fontWeight = FontWeight.SemiBold)
+            Row(
+                Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    Modifier
+                        .size(48.dp)
+                        .background(productAvatarColor(item.product.name), RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        productInitials(item.product.name),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AvatarText,
+                    )
+                }
+                Column {
+                    Text(item.product.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text(
+                        "${item.product.price.toRupiah()} / item",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Text(item.lineTotal.toRupiah(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            FilledTonalButton(
-                onClick = onDec,
-                modifier = Modifier.size(34.dp),
-                contentPadding = PaddingValues(0.dp),
-            ) { Text("−", fontWeight = FontWeight.Bold) }
+            StepButton("−", onDec)
             Text(
                 "${item.qty}",
                 Modifier.width(34.dp),
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
             )
-            FilledTonalButton(
-                onClick = onInc,
-                modifier = Modifier.size(34.dp),
-                contentPadding = PaddingValues(0.dp),
-            ) { Text("+", fontWeight = FontWeight.Bold) }
+            StepButton("+", onInc)
             Spacer(Modifier.weight(1f))
-            TextButton(onClick = onRemove) { Text("Hapus", color = MaterialTheme.colorScheme.error) }
+            Text(
+                "Hapus",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = StatusOrange,
+                modifier = Modifier.clickable(onClick = onRemove),
+            )
         }
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider()
     }
-    HorizontalDivider()
 }
 
 @Composable
-private fun TotalRow(label: String, value: String, emphasized: Boolean = false) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, fontWeight = if (emphasized) FontWeight.Bold else FontWeight.Normal)
-        Text(
-            value,
-            fontWeight = if (emphasized) FontWeight.Bold else FontWeight.Normal,
-            color = if (emphasized) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-        )
+private fun StepButton(label: String, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(32.dp)
+            .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun SummaryRow(label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
     }
 }
