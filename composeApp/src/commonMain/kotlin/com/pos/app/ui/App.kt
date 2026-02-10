@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +48,9 @@ fun App(container: AppContainer) {
     val store = remember { PosStore(container) }
     PosTheme {
         CompositionLocalProvider(LocalStore provides store) {
-            RootScaffold()
+            Box(Modifier.fillMaxSize().background(Color.Black)) {
+                RootScaffold()
+            }
         }
     }
 }
@@ -59,6 +64,8 @@ private fun RootScaffold() {
     val scope = rememberCoroutineScope()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = { HeaderBar(state.settings.storeName, tab) { tab = it } },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
