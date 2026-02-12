@@ -1,5 +1,6 @@
 package com.pos.app.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -46,8 +47,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -59,6 +62,7 @@ import com.pos.app.util.productInitials
 import com.pos.app.util.toRupiah
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 
 private val StatusOrange = Color(0xFFB45309)
 
@@ -243,28 +247,38 @@ private fun ProductCard(product: Product, category: String, onClick: () -> Unit)
                 Modifier
                     .fillMaxWidth()
                     .height(116.dp)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(
                         Brush.verticalGradient(
                             listOf(base.copy(alpha = 0.65f), base.copy(alpha = 0.3f)),
                         ),
-                        RoundedCornerShape(12.dp),
                     ),
             ) {
-                Box(
-                    Modifier
-                        .align(Alignment.Center)
-                        .offset(x = 28.dp, y = -14.dp)
-                        .size(70.dp)
-                        .background(Color.White.copy(alpha = 0.35f), CircleShape),
-                )
-                Text(
-                    productInitials(product.name),
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AvatarText,
-                    letterSpacing = 1.sp,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                val image = productImage(product.name)
+                if (image != null) {
+                    Image(
+                        painter = painterResource(image),
+                        contentDescription = product.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Box(
+                        Modifier
+                            .align(Alignment.Center)
+                            .offset(x = 28.dp, y = -14.dp)
+                            .size(70.dp)
+                            .background(Color.White.copy(alpha = 0.35f), CircleShape),
+                    )
+                    Text(
+                        productInitials(product.name),
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AvatarText,
+                        letterSpacing = 1.sp,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+                }
             }
             Spacer(Modifier.height(10.dp))
             Text(
@@ -468,15 +482,26 @@ private fun CartRow(
                 Box(
                     Modifier
                         .size(48.dp)
-                        .background(productAvatarColor(item.product.name), RoundedCornerShape(12.dp)),
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(productAvatarColor(item.product.name)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        productInitials(item.product.name),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AvatarText,
-                    )
+                    val thumb = productImage(item.product.name)
+                    if (thumb != null) {
+                        Image(
+                            painter = painterResource(thumb),
+                            contentDescription = item.product.name,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    } else {
+                        Text(
+                            productInitials(item.product.name),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AvatarText,
+                        )
+                    }
                 }
                 Column {
                     Text(item.product.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)

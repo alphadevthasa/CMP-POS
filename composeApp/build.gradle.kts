@@ -29,6 +29,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.components.resources)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
             implementation(libs.sqldelight.runtime)
@@ -78,5 +79,12 @@ sqldelight {
         create("PosDatabase") {
             packageName.set("com.pos.app.db")
         }
+    }
+}
+
+compose {
+    resources {
+        publicResClass = true
+        packageOfResClass = "com.pos.app.res"
     }
 }
