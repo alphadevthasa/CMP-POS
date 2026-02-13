@@ -8,3 +8,12 @@ fun Long.grouped(): String {
 }
 
 fun Long.toRupiah(): String = "Rp " + grouped()
+
+/**
+ * Strip grouping/decimal decoration; parse the integer rupiah amount.
+ * The part after "," (decimal) is dropped first so a ",00" suffix can never inflate the value.
+ */
+fun parseRupiahInput(raw: String): Long =
+    raw.substringBefore(',')
+        .filter { it.isDigit() }
+        .toLongOrNull() ?: 0L
