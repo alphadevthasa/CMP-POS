@@ -101,6 +101,8 @@ fun RegisterScreen(scope: CoroutineScope, snackbar: SnackbarHostState) {
 
     if (showPayment) {
         PaymentDialog(
+            itemCount = state.cart.sumOf { it.qty },
+            itemSummary = state.cart.joinToString(", ") { it.product.name },
             total = state.totals.total,
             onDismiss = { showPayment = false },
             onConfirm = { method, tendered ->
