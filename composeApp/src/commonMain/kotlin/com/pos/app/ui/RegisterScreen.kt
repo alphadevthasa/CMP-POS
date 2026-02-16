@@ -440,14 +440,14 @@ private fun CartPane(
             OutlinedButton(
                 onClick = {
                     store.saveOrder()
-                    scope.launch { snackbar.showSnackbar("Pesanan disimpan") }
+                    store.clearCart()
+                    scope.launch { snackbar.showSnackbar("Pesanan tersimpan") }
                 },
                 enabled = state.cart.isNotEmpty(),
                 modifier = Modifier.weight(1f).height(46.dp),
             ) { Text("Simpan") }
             OutlinedButton(
                 onClick = {
-                    store.saveOrder()
                     onPrint(store.currentBillLines(), "bill-${state.savedOrderNo ?: "draft"}")
                 },
                 enabled = state.cart.isNotEmpty(),
