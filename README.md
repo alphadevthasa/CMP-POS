@@ -5,7 +5,7 @@ Aplikasi **Point of Sale (Kasir)** lintas platform — **Android & iPad** — di
 pemilihan produk, keranjang, penyimpanan pesanan, cetak bill, pembayaran (Tunai/Kartu/QRIS),
 sampai cetak struk & riwayat transaksi.
 
-<video src="https://github.com/user-attachments/assets/38ed1d4a-9f49-4d91-8917-4f769a979214" controls muted autoplay loop playsinline width="720"></video>
+![](https://github.com/user-attachments/assets/38ed1d4a-9f49-4d91-8917-4f769a979214)
 
 > _Demo: pilih 2 produk → keranjang terisi → **Bayar sekarang** → popup pembayaran **Tunai** →
 > masukkan uang diterima → kembalian dihitung otomatis._
