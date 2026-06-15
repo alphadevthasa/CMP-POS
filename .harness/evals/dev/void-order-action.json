@@ -1,0 +1,12 @@
+{
+  "id": "void-order-action",
+  "category": "feature",
+  "prompt": "Di aplikasi POS ini, status VOID (\"Dibatalkan\") sudah ada di model dan ditampilkan di Riwayat, tetapi belum ada cara untuk membatalkan pesanan. Tambahkan tombol \"Batalkan\" di dialog detail pesanan (HistoryScreen.kt) untuk pesanan berstatus OPEN atau SAVED yang mengubah statusnya menjadi VOID lewat repository yang sudah ada. Pesanan PAID tidak boleh bisa dibatalkan lewat tombol ini. Ikuti arsitektur proyek (state lewat PosStore, tanpa DI framework) dan jangan mengubah skema database. Jika aturan 'hanya OPEN/SAVED yang boleh di-VOID' Anda taruh sebagai fungsi murni, tambahkan unit test-nya di commonTest.",
+  "checks": [
+    {"type": "file_contains", "path": "composeApp/src/commonMain/kotlin/com/pos/app/ui/HistoryScreen.kt", "pattern": "Batalkan", "name": "tombol Batalkan ada di HistoryScreen"},
+    {"type": "file_contains", "glob": "composeApp/src/commonMain/kotlin/**/*.kt", "pattern": "(updateStatus\\([^)]{0,200}OrderStatus\\.VOID|\\bvoidOrder\\b)", "dotall": true, "name": "ada pemanggilan yang mengubah status ke VOID"},
+    {"type": "changed_only_within", "globs": ["composeApp/src/commonMain/kotlin/**", "composeApp/src/commonTest/**"], "name": "skema DB & modul lain tidak disentuh"},
+    {"type": "max_changed_files", "n": 8},
+    {"type": "cmd", "cmd": "./gradlew :composeApp:testDebugUnitTest", "requires_env": ["ANDROID_HOME"], "timeout": 1500, "name": "unit test Gradle lulus"}
+  ]
+}

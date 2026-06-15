@@ -1,0 +1,114 @@
+# Konfigurasi AI harness untuk CMP-POS.
+# Semua skrip di scripts/harness/ membaca file ini.
+
+[project]
+name = "CMP-POS"
+
+# "Permukaan harness": satu-satunya file yang boleh diubah oleh agen-proposer
+# saat mengoptimasi harness. Eval, skrip, dan config gate TIDAK termasuk,
+# supaya kandidat tidak bisa mengubah alat ukurnya sendiri. gate.py menolak
+# diff yang menyentuh file di luar daftar ini.
+#
+# Sengaja TIDAK termasuk: .claude/commands/* (prosedur optimasi itu sendiri),
+# .harness/evals, scripts/harness, harness.toml, kode aplikasi.
+[surface]
+globs = [
+  "AGENTS.md",
+  "CLAUDE.md",
+  "docs/knowledge/**",
+  ".harness/experiments/*.md",
+]
+
+[agent]
+# Template perintah untuk menjalankan agen pada satu task, di salinan repo.
+# Placeholder: {prompt_file} {workdir} {trace_file}
+# Kosong = mode agent tidak aktif (mode check tetap jalan).
+# Default: Claude Code non-interaktif. Edit file diizinkan; Bash hanya untuk RAG dan Gradle;
+# batas biaya per percobaan US$1. Ubah sesuai anggaran Anda.
+cmd = 'claude -p "$(cat {prompt_file})" --output-format json --permission-mode acceptEdits --max-budget-usd 1 --allowedTools "Bash(python3 scripts/harness/rag.py *)" "Bash(./gradlew *)" Read Edit Write Glob Grep'
+timeout_s = 900
+repeats = 3
+
+[gate]
+# Kandidat ditolak jika pass rate turun lebih dari ini (0.0 = tidak boleh turun).
+max_pass_rate_drop = 0.0
+# Perbaikan dihitung nyata hanya jika naik minimal ini (di atas noise).
+min_improvement = 0.10
+# Kenaikan biaya/langkah rata-rata yang masih ditoleransi (persen).
+max_cost_increase_pct = 20
+max_steps_increase_pct = 25
+# Mode agent wajib menyertakan set held-out.
+require_heldout = true
+# Toleransi penurunan metrik retrieval RAG.
+max_rag_hit_drop = 0.0
+max_rag_mrr_drop = 0.05
+
+[rag]
+# Korpus yang diindeks. Taruh dokumen yang ingin "dipelajari" di docs/knowledge/.
+include = [
+  "README.md",
+  "docs/**",
+  "composeApp/src/**",
+  "gradle/libs.versions.toml",
+  "scripts/*.py",
+]
+exclude_dirs = ["build", ".gradle", ".git", ".kotlin", ".idea", "node_modules", "__pycache__", ".harness"]
+# Dokumen meta tentang harness itu sendiri tidak diindeks: AGENTS.md sudah dimuat langsung ke
+# konteks agen lewat CLAUDE.md, dan ikut diindeks hanya menambah noise (terukur: MRR turun 0.746 -> 0.711).
+exclude_globs = ["AGENTS.md", "CLAUDE.md", "docs/knowledge/README.md"]
+# Ekstensi yang dibaca. .pdf butuh paket opsional `pypdf`.
+extensions = [".md", ".txt", ".rst", ".kt", ".kts", ".sq", ".toml", ".py", ".pdf"]
+chunk_chars = 1200
+min_chunk_chars = 300
+top_k = 5
+index_path = ".harness/rag/index.json"
+
+# Glosarium istilah domain Indonesia -> Inggris. Dokumen/README berbahasa Indonesia,
+# sedangkan identifier di kode berbahasa Inggris, jadi query Indonesia sering tidak
+# menemukan kodenya. Istilah Inggris ikut dicari dengan bobot lebih kecil.
+# Tambahkan istilah proyek Anda di sini.
+[rag.glossary]
+pesanan = ["order"]
+keranjang = ["cart"]
+diskon = ["discount"]
+pajak = ["tax"]
+bayar = ["pay", "payment"]
+tunai = ["cash"]
+kartu = ["card"]
+struk = ["receipt"]
+bill = ["bill"]
+riwayat = ["history"]
+pengaturan = ["settings"]
+produk = ["product"]
+kategori = ["category"]
+kembalian = ["change"]
+kembali = ["change"]
+diterima = ["tendered"]
+cetak = ["print", "printer"]
+simpan = ["save"]
+hitung = ["compute", "calculate", "totals"]
+jumlah = ["qty", "count"]
+harga = ["price"]
+toko = ["store"]
+alamat = ["address"]
+telepon = ["phone"]
+kertas = ["paper"]
+lebar = ["width"]
+tabel = ["table"]
+skema = ["schema"]
+gambar = ["image"]
+foto = ["image", "photo"]
+lisensi = ["license"]
+kredit = ["credit"]
+layar = ["screen"]
+batal = ["void", "cancel"]
+dibatalkan = ["void", "cancelled"]
+tanggal = ["date"]
+waktu = ["time"]
+huruf = ["font"]
+uji = ["test"]
+tes = ["test"]
+pilih = ["select"]
+cari = ["search"]
+pencarian = ["search"]
+lokal = ["local"]

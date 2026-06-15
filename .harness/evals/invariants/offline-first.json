@@ -1,0 +1,16 @@
+{
+  "id": "offline-first",
+  "description": "README: aplikasi offline-first (SQLite lokal), tidak butuh server/internet. Tidak boleh ada pustaka jaringan.",
+  "checks": [
+    {
+      "type": "file_not_contains",
+      "glob": "composeApp/src/**/*.kt",
+      "pattern": "^import (io\\.ktor|okhttp3|retrofit2|java\\.net\\.(URL|HttpURLConnection))"
+    },
+    {
+      "type": "file_not_contains",
+      "glob": ["**/*.kts", "gradle/libs.versions.toml"],
+      "pattern": "(?i)\\b(ktor|okhttp|retrofit)\\b"
+    }
+  ]
+}

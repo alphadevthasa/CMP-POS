@@ -1,0 +1,12 @@
+{
+  "id": "history-status-filter",
+  "category": "feature",
+  "loose": true,
+  "prompt": "Tambahkan filter status di atas daftar pesanan pada layar Riwayat (HistoryScreen.kt): Semua, Disimpan, Lunas, Dibatalkan. Default 'Semua'. Gunakan komponen Material 3 yang sudah dipakai di proyek, ikuti arsitektur yang ada, dan jangan mengubah skema database.",
+  "checks": [
+    {"type": "file_contains", "path": "composeApp/src/commonMain/kotlin/com/pos/app/ui/HistoryScreen.kt", "pattern": "(FilterChip|SegmentedButton|TabRow|DropdownMenu)", "name": "ada komponen pemilih filter"},
+    {"type": "file_contains", "path": "composeApp/src/commonMain/kotlin/com/pos/app/ui/HistoryScreen.kt", "pattern": "filter\\s*\\{[^}]{0,200}status", "dotall": true, "name": "daftar disaring berdasarkan status"},
+    {"type": "changed_only_within", "globs": ["composeApp/src/commonMain/kotlin/**", "composeApp/src/commonTest/**"], "name": "skema DB tidak disentuh"},
+    {"type": "cmd", "cmd": "./gradlew :composeApp:testDebugUnitTest", "requires_env": ["ANDROID_HOME"], "timeout": 1500, "name": "unit test Gradle lulus"}
+  ]
+}

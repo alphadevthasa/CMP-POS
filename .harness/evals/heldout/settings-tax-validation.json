@@ -1,0 +1,11 @@
+{
+  "id": "settings-tax-validation",
+  "category": "feature",
+  "loose": true,
+  "prompt": "Di SettingsScreen, field Pajak (%) menerima angka berapa pun. Batasi agar nilai yang disimpan selalu berada di antara 0 dan 100 (lebih dari 100 dijadikan 100, input tidak valid dijadikan 0). Jangan mengubah model domain.",
+  "checks": [
+    {"type": "file_contains", "path": "composeApp/src/commonMain/kotlin/com/pos/app/ui/SettingsScreen.kt", "pattern": "(coerceIn\\s*\\(\\s*0(\\.0)?\\s*,\\s*100(\\.0)?\\s*\\)|coerceAtMost\\s*\\(\\s*100(\\.0)?\\s*\\)|minOf\\s*\\([^)]*100)", "dotall": true, "name": "ada pembatasan nilai maksimum 100"},
+    {"type": "changed_only_within", "globs": ["composeApp/src/commonMain/kotlin/com/pos/app/ui/**", "composeApp/src/commonTest/**"], "name": "model domain tidak diubah"},
+    {"type": "cmd", "cmd": "./gradlew :composeApp:testDebugUnitTest", "requires_env": ["ANDROID_HOME"], "timeout": 1500, "name": "unit test Gradle lulus"}
+  ]
+}

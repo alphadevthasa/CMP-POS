@@ -1,0 +1,16 @@
+{
+  "id": "no-di-framework",
+  "description": "README: wiring manual lewat AppContainer, tanpa Koin/Hilt/Dagger.",
+  "checks": [
+    {
+      "type": "file_not_contains",
+      "glob": ["**/*.kts", "gradle/libs.versions.toml"],
+      "pattern": "(?i)\\b(koin|hilt|dagger)\\b"
+    },
+    {
+      "type": "file_not_contains",
+      "glob": "composeApp/src/**/*.kt",
+      "pattern": "^import (org\\.koin|dagger|javax\\.inject)"
+    }
+  ]
+}

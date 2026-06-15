@@ -1,0 +1,11 @@
+{
+  "id": "docs-sync-breakpoint",
+  "category": "docs-grounding",
+  "prompt": "Dokumentasi tidak konsisten soal batas lebar layar untuk tampilan dua panel (two-pane). Periksa kode untuk mengetahui nilai yang benar, lalu sinkronkan spec di docs/superpowers/specs/2026-10-17-pos-multiplatform-design.md dan README.md dengan kode. Jangan mengubah kode.",
+  "checks": [
+    {"type": "file_not_contains", "path": "docs/superpowers/specs/2026-10-17-pos-multiplatform-design.md", "pattern": "900\\s*dp", "name": "spec tidak lagi menyebut 900dp"},
+    {"type": "file_contains", "path": "docs/superpowers/specs/2026-10-17-pos-multiplatform-design.md", "pattern": "700\\s*dp", "name": "spec menyebut 700dp"},
+    {"type": "file_contains", "path": "README.md", "pattern": "700\\s*dp", "name": "README tetap menyebut 700dp"},
+    {"type": "changed_only_within", "globs": ["docs/**", "README.md"], "name": "kode tidak diubah"}
+  ]
+}

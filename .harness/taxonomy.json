@@ -1,0 +1,66 @@
+{
+  "rule_violation": {
+    "description": "Hasil melanggar aturan keras proyek (invariant arsitektur).",
+    "priority": 1,
+    "levers": [
+      "AGENTS.md: perjelas aturan keras, beri contoh pelanggaran dan alternatif yang benar",
+      "AGENTS.md: pindahkan aturan keras ke bagian paling atas"
+    ]
+  },
+  "scope_creep": {
+    "description": "Agen mengubah file di luar lingkup tugas atau terlalu banyak file.",
+    "priority": 2,
+    "levers": [
+      "AGENTS.md: tegaskan 'perubahan sekecil mungkin' dan minta daftar file yang akan disentuh sebelum mengedit",
+      "AGENTS.md: larang refactor tak diminta"
+    ]
+  },
+  "forbidden_change": {
+    "description": "Muncul perubahan yang dilarang (pola terlarang ada di hasil).",
+    "priority": 3,
+    "levers": [
+      "AGENTS.md: sebutkan eksplisit apa yang tidak boleh berubah",
+      "RAG: pastikan dokumen acuan benar ditemukan sebelum mengedit docs"
+    ]
+  },
+  "test_failure": {
+    "description": "Tes (termasuk tes tersembunyi) gagal.",
+    "priority": 4,
+    "levers": [
+      "AGENTS.md: wajibkan menjalankan tes dan membaca kegagalan sebelum menyatakan selesai",
+      "AGENTS.md: wajib mencocokkan perilaku ke contoh di prompt, bukan menebak"
+    ]
+  },
+  "missing_change": {
+    "description": "Perubahan yang diminta tidak ada atau tidak lengkap.",
+    "priority": 5,
+    "levers": [
+      "AGENTS.md: ubah permintaan jadi checklist dan verifikasi tiap butir sebelum selesai",
+      "RAG: perbaiki retrieval / glosarium agar konteks relevan ditemukan (rag.glossary, chunking, top_k)"
+    ]
+  },
+  "timeout_or_loop": {
+    "description": "Agen kehabisan waktu atau mengulang tool call yang sama (>= 4 kali berurutan).",
+    "priority": 0,
+    "levers": [
+      "AGENTS.md: tetapkan batas percobaan dan kriteria berhenti; setelah 2 kegagalan sama, ganti pendekatan",
+      "AGENTS.md: kurangi instruksi yang saling bertentangan"
+    ]
+  },
+  "agent_error": {
+    "description": "Proses agen berakhir error (exit code != 0 / is_error).",
+    "priority": 0,
+    "levers": [
+      "Periksa agent.cmd, izin tool, dan anggaran biaya di .harness/harness.toml (bukan di surface)"
+    ]
+  },
+  "retrieval_miss": {
+    "description": "Eval RAG: potongan yang benar tidak muncul di top-k.",
+    "priority": 6,
+    "levers": [
+      "harness.toml [rag.glossary]: tambah padanan istilah Indonesia -> Inggris",
+      "harness.toml [rag]: ubah chunk_chars / top_k",
+      "docs/knowledge: tambah dokumen yang menjelaskan konsep yang sering meleset"
+    ]
+  }
+}

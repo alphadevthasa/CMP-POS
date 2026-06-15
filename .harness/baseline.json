@@ -1,0 +1,44 @@
+{
+  "run_id": "baseline-check",
+  "mode": "check",
+  "repo": "cmp-pos",
+  "git_rev": "723bb14+dirty",
+  "created_at": "2026-10-21T14:35:18+0700",
+  "env": {
+    "android_sdk": false
+  },
+  "agent_cmd_sha": "a471b0681a",
+  "invariants": {
+    "passed": 7,
+    "total": 7,
+    "failed": [],
+    "checks": {
+      "common-no-platform-imports": "pass",
+      "domain-pure": "pass",
+      "harness-files-present": "pass",
+      "money-is-long": "pass",
+      "no-di-framework": "pass",
+      "offline-first": "pass",
+      "tests-not-removed": "pass"
+    },
+    "details": {}
+  },
+  "rag": {
+    "n": 14,
+    "hit_at_k": 0.9286,
+    "mrr": 0.7464,
+    "dev": {
+      "n": 10,
+      "hit_at_k": 0.9,
+      "mrr": 0.725
+    },
+    "heldout": {
+      "n": 4,
+      "hit_at_k": 1.0,
+      "mrr": 0.8
+    },
+    "misses": [
+      "skema tabel pesanan di SQLite"
+    ]
+  }
+}

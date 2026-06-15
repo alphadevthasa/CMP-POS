@@ -8,3 +8,9 @@ local.properties
 .DS_Store
 xcuserdata/
 *.xcworkspace/xcuserdata/
+
+# AI harness: artefak lokal
+.harness/runs/
+.harness/rag/
+__pycache__/
+*.pyc

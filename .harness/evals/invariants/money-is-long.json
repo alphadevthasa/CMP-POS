@@ -1,0 +1,11 @@
+{
+  "id": "money-is-long",
+  "description": "README: nilai uang disimpan sebagai integer Rupiah (Long). Field uang di model domain tidak boleh Double/Float. (taxPercent adalah persentase, bukan uang, jadi tidak termasuk.)",
+  "checks": [
+    {
+      "type": "file_not_contains",
+      "glob": "composeApp/src/commonMain/kotlin/com/pos/app/domain/**/*.kt",
+      "pattern": "val\\s+(price|subtotal|tax|discount|total|paidTotal|changeDue|amount|tendered|changeGiven|lineTotal|priceSnapshot)\\s*:\\s*(Double|Float)"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "common-no-platform-imports",
+  "description": "Kode commonMain harus bisa dikompilasi untuk Android dan iOS: tidak boleh meng-import API khusus platform (android.*, platform.*, java.*, androidx.activity/core). androidx.compose.* boleh (Compose Multiplatform).",
+  "checks": [
+    {
+      "type": "file_not_contains",
+      "glob": "composeApp/src/commonMain/**/*.kt",
+      "pattern": "^import (android\\.|platform\\.|java\\.|androidx\\.(activity|core|appcompat)\\b)"
+    }
+  ]
+}

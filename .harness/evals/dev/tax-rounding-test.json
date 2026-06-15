@@ -1,0 +1,10 @@
+{
+  "id": "tax-rounding-test",
+  "category": "test-writing",
+  "prompt": "Tambahkan unit test di composeApp/src/commonTest/kotlin/com/pos/app/CartTest.kt untuk computeTotals yang mencakup: (1) pajak 11% atas subtotal yang menghasilkan pecahan rupiah (assert sesuai perilaku fungsi saat ini, jangan ubah implementasinya), (2) diskon yang sama persis dengan subtotal, dan (3) keranjang kosong. Jangan mengubah kode produksi.",
+  "checks": [
+    {"type": "file_contains", "path": "composeApp/src/commonTest/kotlin/com/pos/app/CartTest.kt", "pattern": "@Test", "min_count": 6, "name": "CartTest bertambah minimal 3 tes"},
+    {"type": "changed_only_within", "globs": ["composeApp/src/commonTest/**"], "name": "kode produksi tidak diubah"},
+    {"type": "cmd", "cmd": "./gradlew :composeApp:testDebugUnitTest", "requires_env": ["ANDROID_HOME"], "timeout": 1500, "name": "unit test Gradle lulus"}
+  ]
+}

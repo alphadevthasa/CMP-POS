@@ -1,0 +1,11 @@
+{
+  "id": "domain-pure",
+  "description": "README: 'Domain murni — tanpa dependensi UI/DB'. Lapisan domain tidak boleh meng-import UI, data, print, SQLDelight, atau API platform.",
+  "checks": [
+    {
+      "type": "file_not_contains",
+      "glob": "composeApp/src/commonMain/kotlin/com/pos/app/domain/**/*.kt",
+      "pattern": "^import (androidx\\.|android\\.|platform\\.|app\\.cash\\.sqldelight|com\\.pos\\.app\\.(ui|data|print)\\b)"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "harness-files-present",
+  "description": "Berkas inti harness harus tetap ada (AGENTS.md, CLAUDE.md, konfigurasi, perintah /harness-optimize).",
+  "checks": [
+    {
+      "type": "file_exists",
+      "path": "AGENTS.md"
+    },
+    {
+      "type": "file_exists",
+      "path": "CLAUDE.md"
+    },
+    {
+      "type": "file_exists",
+      "path": ".harness/harness.toml"
+    },
+    {
+      "type": "file_exists",
+      "path": ".claude/commands/harness-optimize.md"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "rupiah-short-format",
+  "category": "feature",
+  "prompt": "Tambahkan fungsi `fun Long.toRupiahShort(): String` di composeApp/src/commonMain/kotlin/com/pos/app/util/Money.kt untuk menampilkan nominal ringkas dengan format Indonesia. Di bawah 1.000 tampil apa adanya (900 -> \"Rp 900\"); ribuan memakai \"rb\" (25000 -> \"Rp 25rb\", 1500 -> \"Rp 1,5rb\"); jutaan memakai \"jt\" (2000000 -> \"Rp 2jt\", 1500000 -> \"Rp 1,5jt\"). Angka bulat tanpa desimal; selain itu maksimal satu desimal dengan koma sebagai pemisah. Tambahkan juga unit test Anda sendiri di commonTest.",
+  "inject_files": [
+    {"src": "hidden/RupiahShortHiddenTest.kt", "dst": "composeApp/src/commonTest/kotlin/com/pos/app/RupiahShortHiddenTest.kt"}
+  ],
+  "checks": [
+    {"type": "file_contains", "path": "composeApp/src/commonMain/kotlin/com/pos/app/util/Money.kt", "pattern": "fun\\s+Long\\.toRupiahShort\\s*\\(", "name": "fungsi toRupiahShort ada di Money.kt"},
+    {"type": "changed_only_within", "globs": ["composeApp/src/commonMain/kotlin/**", "composeApp/src/commonTest/**"], "name": "perubahan terbatas ke kode & tes"},
+    {"type": "max_changed_files", "n": 4},
+    {"type": "cmd", "cmd": "./gradlew :composeApp:testDebugUnitTest", "requires_env": ["ANDROID_HOME"], "timeout": 1500, "name": "unit test (termasuk tes tersembunyi) lulus"}
+  ]
+}

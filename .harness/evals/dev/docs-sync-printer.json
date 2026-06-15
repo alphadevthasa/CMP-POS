@@ -1,0 +1,11 @@
+{
+  "id": "docs-sync-printer",
+  "category": "docs-grounding",
+  "prompt": "Bagian Printing di spec desain (docs/superpowers/specs/2026-10-17-pos-multiplatform-design.md) tidak lagi sesuai dengan kode. Periksa kode di folder print (common, androidMain, iosMain) lalu perbarui spec agar mencerminkan abstraksi, nama tipe, dan perilaku printer yang sebenarnya di tiap platform. Jangan mengubah kode.",
+  "checks": [
+    {"type": "file_not_contains", "path": "docs/superpowers/specs/2026-10-17-pos-multiplatform-design.md", "pattern": "expect class Printer", "name": "spec tidak lagi menyebut expect class Printer"},
+    {"type": "file_contains", "path": "docs/superpowers/specs/2026-10-17-pos-multiplatform-design.md", "pattern": "ReceiptPrinter", "name": "spec menyebut ReceiptPrinter"},
+    {"type": "file_not_contains", "path": "docs/superpowers/specs/2026-10-17-pos-multiplatform-design.md", "pattern": "CoreBluetooth BLE write", "name": "spec tidak mengklaim BLE iOS sudah ada"},
+    {"type": "changed_only_within", "globs": ["docs/**", "README.md"], "name": "kode tidak diubah"}
+  ]
+}
